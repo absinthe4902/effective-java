@@ -1,14 +1,5 @@
 # item 83
 
-### 추가로 알아보고 싶은 것
-
-- [ ]  lazy initalization vs lazy evaluation
-- [ ]  초기화 순환성 (initalization circularity)
-- [ ]  volatile 이 뭔지
-- [ ]  volatile이 long과 double에는 필수로 쓰여야 하는 이유
-- [ ]  클래스와 인스턴스 초기화 때 발생하는 위험한 순환 문제가 무엇인지.
-- [ ]  지연초기화 홀더 관용구는 직접 써보자. 저거 진짜 한 번 만 호출되는게 맞나??
-
 > 지연 초기화는 신중히 사용하라
 
 - 지연초기화는 필드의 초기화 시점을 그 값이 처음 필요할 때까지 늦추는 기법
@@ -16,7 +7,7 @@
 - 이 기법은 정적 필드와 인스턴스 필드 모두에 사용 가능
 - 주로 최적화 용도로 사용하지만, 클래스와 인스턴스 초기화 때 발생하는 위험한 순환 문제를 해결할 수 있음
 
-
+lazy initalization /lazy loading /lazy evaluation
 
 ## 지연 초기화를 위한 최선의 조언 "필요할 때까지는 하지 말라"
 
@@ -39,7 +30,7 @@
 private final FieldType field = computeFieldValue();
 ```
 
-지연초기화로 인해 초기화 순환성(initalization circularity)가 깨질 것 같으면 **synchronized** 를 사용하자. 
+지연초기화로 인해 초기화 순환성(initalization circularity)가 깨질 것 같으면 **synchronized** 를 사용하자. (초기화 순환성이 깨진 예: class A 의 생성자는 class B 인스턴스가 필요하고 class B 생성자는 class C 인스턴스가 필요하고  class C 생성자는  class A 인스턴스가 필요하다)
 
 ```java
 private FieldType field;
@@ -111,6 +102,9 @@ private FieldType getField() {
 
 - 이번 아이템에서 이야기한 모든 초기화 기법은 기본 타입 필드와 객체 참조 필드 모두에 적용할 수 있다. 이중검사와 단일검사 관용구를 수치 기본 타입 필드에 적용한다면 필드의 값을 null 대신 (숫자 기본 타입 변수의 기본값인) 0과 비교하면 된다.
 - 모든 스레드가 필드의 값을 다시 계산해도 상관없고 필드의 타입이 long과 double을 제외한 다른 기본 타입이라면 단일검사의 필드 선언에서 volatile을 없애도 된다. (racy single-check)
+
+    (long 과 double은 꼭 volatile을 써야 하는 이유:  한번에 32bits씩 읽고 쓰는데 long과 double은 8byte 라서 32 bits는 한 쓰레드에, 나머지 32bits 는 다른 쓰레드에 써질 수 있다. (word taering)
+
 - racy single-check 은 어떤 환경에서는 필드 접근 속도를 높여주지만, 초기화가 스레드당 최대 한 번 더 이뤄질 수 있는 아주 이례적인 기법으로, 잘 쓰지 않는다.
 
 ## 핵심 정리

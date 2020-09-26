@@ -31,7 +31,8 @@ public class item83 {
         System.out.println(singleTon1);
         System.out.println(singleTon2);
 
-
+//        concurrent 예제 참고. 여기서 다 안 다뤘다. 쓰레드 동작 필요할 떄 봐보자.
+//        https://winterbe.com/posts/2015/04/07/java8-concurrency-tutorial-thread-executor-examples/
         //자바의 오래된 동기화 방식인 Threads, Runnables, Callcables 를 새롭게 커버해주는 패키지 import java.util.concurrent
 
         // Runnable cover
@@ -69,7 +70,7 @@ public class item83 {
         ExecutorService excutor2 = Executors.newFixedThreadPool(1);
 
         // callable의 비동기적 특성 상 실행을 한다고 해도 바로 값을 사용할 수 없다.
-        // 대신 executor 에서 특별히게 Future 이라는 객체를 사용하게 해줬다. 이건 내가 보낼ㄸ
+        // 대신 executor 에서 특별히게 Future 이라는 객체를 사용하게 해줬다. 이건 이후에 값이 들어오면 꺼내서 쓸 수 있다.
         Future<BuilderPatternSample> future = excutor2.submit(task);
 
         System.out.println("future down? " + future.isDone());
@@ -78,9 +79,17 @@ public class item83 {
             BuilderPatternSample result = future.get();
             System.out.println("future done? " + future.isDone());
             System.out.println("result: " + result.toStringValue());
+            excutor2.shutdown();
+            excutor2.awaitTermination(5, TimeUnit.SECONDS);
         } catch (ExecutionException | InterruptedException e) {
             System.out.println("Exception happened when getting value");
             e.printStackTrace();
+        } finally {
+            if (!excutor2.isTerminated()) {
+                System.err.println("cancel non-finished tasks");
+            }
+            excutor2.shutdown();
+            System.out.println("shutdown finished");
         }
     }
 
